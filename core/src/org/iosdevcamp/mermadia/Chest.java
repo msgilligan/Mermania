@@ -8,22 +8,26 @@ import java.util.Random;
 public class Chest {
     private boolean found;
     private boolean keyFound;
-    private int x, y;
+    private int x, y, width, height;
     Random r;
 
-    public Chest(){
+    public Chest(int width, int height){
         found = false;
         keyFound = false;
-        r = new Random(0);
+        r = new Random();
         x = r.nextInt(MermaniaGame.WORLD_WIDTH);
-        y = r.nextInt(MermaniaGame.WORLD_HEIGHT);
+        y = r.nextInt(MermaniaGame.WORLD_HEIGHT) - MermaniaGame.WORLD_HEIGHT / 2 - height;
+        this.width = width;
+        this.height = height;
     }
-    public Chest(int x, int y){
+    public Chest(int x, int y, int width, int height){
         found = false;
         keyFound = false;
-        r = new Random(0);
+        r = new Random();
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     public boolean isFound(){
@@ -34,6 +38,12 @@ public class Chest {
     }
     public int getY(){
         return y;
+    }
+    public int getWidth(){
+        return width;
+    }
+    public int getHeight(){
+        return height;
     }
 
     public void setX(int x){

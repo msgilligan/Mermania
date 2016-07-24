@@ -15,10 +15,14 @@ public class Monster extends NPC {
     @Override
     public double move(){
         double turn = super.move();
-        if(key.getX() == this.getX() && key.getY() == this.getY())
+        if(key.getX() >= this.getX() && key.getX() + key.getWidth() <= this.getX() &&
+                key.getY() >= this.getY() && key.getY() + key.getHeight() <= this.getY()) {
             key.relocate();
-        if(chest.getX() == this.getX() && chest.getY() == this.getY())
+        }
+        if(chest.getX() >= this.getX() && chest.getX() + chest.getWidth() <= this.getX() &&
+                chest.getY() >= this.getY() && chest.getY() + chest.getHeight() <= this.getY()) {
             chest.relocate();
+        }
         return turn;
     }
 }
