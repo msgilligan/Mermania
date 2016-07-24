@@ -17,7 +17,8 @@ public class IOSMoeLauncher extends IOSApplication.Delegate {
     @Override
     protected IOSApplication createApplication() {
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
-        config.useAccelerometer = false;
+        config.useAccelerometer = true;
+        config.useCompass = true;
         return new IOSApplication(new MermaniaGame(), config);
     }
 
