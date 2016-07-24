@@ -2,6 +2,7 @@ package org.iosdevcamp.mermadia;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,6 +15,9 @@ import com.badlogic.gdx.input.GestureDetector.GestureListener;
 public class MermaniaGame extends ApplicationAdapter implements GestureListener {
 	public static final int WORLD_WIDTH = 16200;
 	public static final int WORLD_HEIGHT = 1920;
+	public static final float COMPASS_DEBOUNCE = 3;
+	private float compassFactor;
+	private int numChecksSinceLastPrint;
 	SpriteBatch batch;
 	Sprite keySprite;
 	Sprite chestSprite;
@@ -27,6 +31,8 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 
 	Texture BGImg[];
 
+	float deltaAzimuth, lastAzimuth;
+
 	private OrthographicCamera camera;
 	private int cameraX;
 
@@ -38,6 +44,7 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 		for(int i = 0; i < BGImg.length; i++) {
 			BGImg[i] = new Texture("Background.png");
 		}
+		compassFactor = (WORLD_WIDTH + BGImg[0].getWidth()) / 360 ;
 
 		Gdx.input.setInputProcessor(new GestureDetector(this));
 
@@ -57,6 +64,7 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		checkCompass();
 		NPCSprite.rotate((float) Math.toDegrees((float) friend.move()));
 		monsterSprite.rotate((float) Math.toDegrees((float) monster.move()));
 
@@ -82,6 +90,34 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 		NPCSprite.draw(batch);
 		monsterSprite.draw(batch);
 		batch.end();
+	}
+
+	public void checkCompass(){
+		float newAzimuth = Gdx.input.getAzimuth();
+		deltaAzimuth = (newAzimuth - lastAzimuth);
+		if (numChecksSinceLastPrint++ > 200) {
+			System.out.println("checking: " + newAzimuth + " " + lastAzimuth);
+			numChecksSinceLastPrint = 0;
+		}
+		if (Math.abs(deltaAzimuth) > COMPASS_DEBOUNCE) { //debounces compass changes
+			System.out.println("moving: " + newAzimuth + " " + lastAzimuth);
+			moveCamera(-deltaAzimuth * compassFactor);
+			lastAzimuth = newAzimuth;
+
+		}
+	}
+
+	public void moveCamera(float deltaX) {
+		camera.translate(deltaX, 0);
+		cameraX += deltaX;
+		if(cameraX < -BGImg[0].getWidth() / 2) {
+			camera.translate(WORLD_WIDTH + BGImg[0].getWidth(), 0);
+			cameraX += WORLD_WIDTH + BGImg[0].getWidth();
+		} else if(cameraX > WORLD_WIDTH + BGImg[5].getWidth() / 2){
+			camera.translate(-WORLD_WIDTH - BGImg[0].getWidth(), 0);
+			cameraX += -WORLD_WIDTH - BGImg[0].getWidth();
+		}
+		camera.update();
 	}
 	
 	@Override
@@ -130,19 +166,10 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 	}
 	@Override
 	public boolean pan(float x, float y, float deltaX, float deltaY) {		//Wrapping world w/ deadspot at seam
-		// TODO Auto-generated method stub
-		camera.translate(-deltaX * 2, 0);
-		cameraX -= (deltaX * 2);
-		if(cameraX < -BGImg[0].getWidth() / 2) {
-			camera.translate(WORLD_WIDTH + BGImg[0].getWidth(), 0);
-			cameraX += WORLD_WIDTH + BGImg[0].getWidth();
-		} else if(cameraX > WORLD_WIDTH + BGImg[5].getWidth() / 2){
-			camera.translate(-WORLD_WIDTH - BGImg[0].getWidth(), 0);
-			cameraX += -WORLD_WIDTH - BGImg[0].getWidth();
-		}
-		camera.update();
+		moveCamera(-deltaX * 2);
 		return false;
 	}
+
 	@Override
 	public boolean zoom(float initialDistance, float distance) {
 // TODO Auto-generated method stub
