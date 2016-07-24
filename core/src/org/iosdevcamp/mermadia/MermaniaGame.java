@@ -12,6 +12,8 @@ import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 
+import java.util.Random;
+
 public class MermaniaGame extends ApplicationAdapter implements GestureListener {
 	public static final int WORLD_WIDTH = 16200;
 	public static final int WORLD_HEIGHT = 1920;
@@ -30,31 +32,50 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 	Monster monster;
 
 	Texture BGImg[];
+	Sprite vegitation[];
 
 	float deltaAzimuth, lastAzimuth;
 
 	private OrthographicCamera camera;
 	private int cameraX;
 
+	Random r;
+
 	@Override
 	public void create () {
+		r = new Random();
 		camera = new OrthographicCamera(1080, 1920);
 		batch = new SpriteBatch();
 		BGImg = new Texture[8];
+		vegitation = new Sprite[20];
 		for(int i = 0; i < BGImg.length; i++) {
 			BGImg[i] = new Texture("Background.png");
 		}
 		compassFactor = (WORLD_WIDTH + BGImg[0].getWidth()) / 360 ;
+		for(int i = 0; i < vegitation.length; i++){
+			if(i % 2 == 0){
+				vegitation[i] = new Sprite(new Texture("kelpo no. 1.gif"));
+				vegitation[i].setPosition(r.nextFloat() * WORLD_WIDTH, r.nextFloat() * WORLD_HEIGHT / 4 - WORLD_HEIGHT / 2);
+				vegitation[i].scale(7);
+			} else {
+				vegitation[i] = new Sprite(new Texture("kelpono.2.gif"));
+				vegitation[i].setPosition(r.nextFloat() * WORLD_WIDTH, r.nextFloat() * WORLD_HEIGHT / 4 - WORLD_HEIGHT / 2);
+				vegitation[i].scale(7);
+			}
+		}
 
 		Gdx.input.setInputProcessor(new GestureDetector(this));
 
-		keySprite = new Sprite(new Texture("Seahorse.png"));
-		chestSprite = new Sprite(new Texture("badlogic.jpg"));
+		keySprite = new Sprite(new Texture("key.gif"));
+		keySprite.scale((float) 5);
+		chestSprite = new Sprite(new Texture("treasurechest.gif"));
+		chestSprite.scale((float) 7);
 		NPCSprite = new Sprite(new Texture("Mermaid.png"));
+		NPCSprite.scale((float) 5);
 		monsterSprite = new Sprite(new Texture("monsterone.png"));
 
-		key = new Key(0, 100);
-		chest = new Chest(400, 400);
+		key = new Key(keySprite.getRegionWidth(), keySprite.getRegionHeight());
+		chest = new Chest(chestSprite.getRegionWidth(), chestSprite.getRegionHeight());
 		friend = new NPC(NPCSprite.getRegionWidth(), NPCSprite.getRegionHeight());
 		monster = new Monster(monsterSprite.getRegionWidth(), monsterSprite.getRegionHeight(), key, chest);
 	}
@@ -86,6 +107,9 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 		if(!key.isFound()) {
 			keySprite.draw(batch);
 		}
+        for (Sprite aVegitation : vegitation) {
+            aVegitation.draw(batch);
+        }
 		chestSprite.draw(batch);
 		NPCSprite.draw(batch);
 		monsterSprite.draw(batch);
@@ -119,13 +143,13 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 		}
 		camera.update();
 	}
-	
+
 	@Override
 	public void dispose () {
 		batch.dispose();
-		for(int i = 0; i < BGImg.length; i++) {
-			BGImg[i].dispose();
-		}
+        for (Texture aBGImg : BGImg) {
+            aBGImg.dispose();
+        }
 	}
 
 	@Override

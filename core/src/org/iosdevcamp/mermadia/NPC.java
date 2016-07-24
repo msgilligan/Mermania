@@ -30,16 +30,16 @@ public class NPC {
 
     public double move(){
         double turn;
-        turn = r.nextDouble() - .5;
+        turn = (r.nextDouble() - .5) / 2;
         angle += turn;
         x += (Math.cos(angle) * RANGE);
         y += (Math.sin(angle) * RANGE);
-        if(x < 0)
-            x = 0;
+        if(x < -MermaniaGame.WORLD_HEIGHT/2)
+            x = -MermaniaGame.WORLD_HEIGHT/2;
         if(x > MermaniaGame.WORLD_WIDTH - width)
             x = MermaniaGame.WORLD_WIDTH - width;
-        if(y < 0)
-            y = 0;
+        if(y < -MermaniaGame.WORLD_HEIGHT/2)
+            y = -MermaniaGame.WORLD_HEIGHT/2;
         if(y > MermaniaGame.WORLD_HEIGHT/2 - height)
             y = MermaniaGame.WORLD_HEIGHT/2 - height;
         return turn;
