@@ -11,13 +11,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
+import org.iosdevcamp.mermadia.util.CompassStabilizingQueue;
 
 import java.util.Random;
 
 public class MermaniaGame extends ApplicationAdapter implements GestureListener {
 	public static final int WORLD_WIDTH = 16200;
 	public static final int WORLD_HEIGHT = 1920;
-	public static final float COMPASS_DEBOUNCE = 3;
+	public static final float COMPASS_DEBOUNCE = 1;
 	private float compassFactor;
 	private int numChecksSinceLastPrint;
 	SpriteBatch batch;
@@ -25,6 +26,7 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 	Sprite chestSprite;
 	Sprite NPCSprite;
 	Sprite monsterSprite;
+	private CompassStabilizingQueue stabilizer = new CompassStabilizingQueue();
 
 	Key key;
 	Chest chest;
@@ -118,16 +120,16 @@ public class MermaniaGame extends ApplicationAdapter implements GestureListener 
 
 	public void checkCompass(){
 		float newAzimuth = Gdx.input.getAzimuth();
-		deltaAzimuth = (newAzimuth - lastAzimuth);
+		float stableAzimuth = stabilizer.stabilizeAzimuth(newAzimuth);
+		deltaAzimuth = (stableAzimuth - lastAzimuth);
 		if (numChecksSinceLastPrint++ > 200) {
-			System.out.println("checking: " + newAzimuth + " " + lastAzimuth);
+			System.out.println("checking stable/new/last: " + stableAzimuth + " " + newAzimuth + " " + lastAzimuth);
 			numChecksSinceLastPrint = 0;
 		}
 		if (Math.abs(deltaAzimuth) > COMPASS_DEBOUNCE) { //debounces compass changes
-			System.out.println("moving: " + newAzimuth + " " + lastAzimuth);
+			System.out.println("moving: " + stableAzimuth + " " + lastAzimuth);
 			moveCamera(-deltaAzimuth * compassFactor);
-			lastAzimuth = newAzimuth;
-
+			lastAzimuth = stableAzimuth;
 		}
 	}
 
